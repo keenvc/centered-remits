@@ -8,7 +8,7 @@ import twilio from 'twilio';
 const squareClient: any = null;
 
 // Initialize MXRoute email transporter
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   host: process.env.MXROUTE_SMTP_HOST || 'mail.mxroute.com',
   port: parseInt(process.env.MXROUTE_SMTP_PORT || '587'),
   secure: false, // true for 465, false for other ports
