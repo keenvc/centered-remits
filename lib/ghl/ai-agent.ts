@@ -18,17 +18,20 @@ interface QueryResult {
 }
 
 export class GHLAIAgent {
-  private client: Anthropic;
+  private client: Anthropic | null = null;
   private conversationHistory: any[] = [];
 
-  constructor() {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    
-    if (!apiKey) {
-      throw new Error('ANTHROPIC_API_KEY environment variable is not configured');
-    }
+  private getClient(): Anthropic {
+    if (!this.client) {
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      
+      if (!apiKey) {
+        throw new Error('ANTHROPIC_API_KEY environment variable is not configured');
+      }
 
-    this.client = new Anthropic({ apiKey });
+      this.client = new Anthropic({ apiKey });
+    }
+    return this.client;
   }
 
   /**
@@ -40,7 +43,7 @@ export class GHLAIAgent {
       ? [...this.conversationHistory, { role: 'user' as const, content: prompt }]
       : [{ role: 'user' as const, content: prompt }];
 
-    const response = await this.client.messages.create({
+    const response = await this.getClient().messages.create({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: options?.maxTokens || 4096,
       tools: this.getClaudeTools(),

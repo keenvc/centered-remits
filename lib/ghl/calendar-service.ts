@@ -65,8 +65,15 @@ export interface CreatedCalendar {
 const CENTERED_LOCATION_ID = 'tjZJ0hbW7tD1I21hCS41';
 
 export class CalendarManagementService {
-  private ghl = getGHLClient();
+  private ghl: ReturnType<typeof getGHLClient> | null = null;
   private baseUrl = 'https://services.leadconnectorhq.com';
+
+  private getClient() {
+    if (!this.ghl) {
+      this.ghl = getGHLClient();
+    }
+    return this.ghl;
+  }
 
   /**
    * Create a personal booking calendar for a staff member
@@ -205,7 +212,7 @@ export class CalendarManagementService {
    */
   async getCalendars(): Promise<any[]> {
     try {
-      const calendars = await this.ghl.calendars.getCalendars({
+      const calendars = await this.getClient().calendars.getCalendars({
         locationId: CENTERED_LOCATION_ID
       });
 

@@ -4,12 +4,12 @@
  */
 
 import { getGHLClient, GHL_CONFIG } from './client';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '../supabase';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+// Lazy getter for Supabase client
+function getSupabase() {
+  return getSupabaseClient();
+}
 
 export interface PatientData {
   id: string;
@@ -27,7 +27,14 @@ export interface PatientData {
 }
 
 export class GHLContactService {
-  private ghl = getGHLClient();
+  private ghl: ReturnType<typeof getGHLClient> | null = null;
+
+  private getClient() {
+    if (!this.ghl) {
+      this.ghl = getGHLClient();
+    }
+    return this.ghl;
+  }
 
   /**
    * Sync single patient to GHL (Direct API - user-initiated)
@@ -68,7 +75,7 @@ export class GHLContactService {
 
       if (patient.ghl_contact_id) {
         // Update existing contact
-        await this.ghl.contacts.updateContact({
+        await this.getClient().contacts.updateContact({
           contactId: patient.ghl_contact_id,
           ...contactData
         });
@@ -76,7 +83,7 @@ export class GHLContactService {
         console.log(`✅ Updated GHL contact: ${ghlContactId}`);
       } else {
         // Create new contact
-        const response = await this.ghl.contacts.createContact(contactData);
+        const response = await this.getClient().contacts.createContact(contactData);
         ghlContactId = response.contact.id;
         console.log(`✅ Created GHL contact: ${ghlContactId}`);
       }
@@ -110,7 +117,7 @@ export class GHLContactService {
    * Get contact from GHL (Direct API - fast lookup)
    */
   async getContact(contactId: string) {
-    const response = await this.ghl.contacts.getContact({
+    const response = await this.getClient().contacts.getContact({
       contactId
     });
     return response.contact;
@@ -120,7 +127,7 @@ export class GHLContactService {
    * Update contact in GHL (Direct API - specific update)
    */
   async updateContact(contactId: string, updates: any) {
-    await this.ghl.contacts.updateContact({
+    await this.getClient().contacts.updateContact({
       contactId,
       locationId: GHL_CONFIG.locationId,
       ...updates
@@ -135,7 +142,7 @@ export class GHLContactService {
     tags?: string[];
     limit?: number;
   }) {
-    const response = await this.ghl.contacts.getContacts({
+    const response = await this.getClient().contacts.getContacts({
       locationId: GHL_CONFIG.locationId,
       query: params.query,
       limit: params.limit || 20
@@ -148,7 +155,7 @@ export class GHLContactService {
    * Add tags to contact (Direct API)
    */
   async addTags(contactId: string, tags: string[]) {
-    await this.ghl.contacts.addTagsToContact({
+    await this.getClient().contacts.addTagsToContact({
       contactId,
       tags
     });
@@ -158,7 +165,7 @@ export class GHLContactService {
    * Remove tags from contact (Direct API)
    */
   async removeTags(contactId: string, tags: string[]) {
-    await this.ghl.contacts.removeTagsFromContact({
+    await this.getClient().contacts.removeTagsFromContact({
       contactId,
       tags
     });
@@ -171,7 +178,7 @@ export class GHLContactService {
   async syncGHLContactToPatient(ghlContactId: string): Promise<string> {
     try {
       // Get contact from GHL
-      const response = await this.ghl.contacts.getContact({
+      const response = await this.getClient().contacts.getContact({
         contactId: ghlContactId
       });
 

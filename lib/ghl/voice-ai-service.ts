@@ -55,8 +55,15 @@ export interface VoiceAgent {
 }
 
 export class VoiceAIService {
-  private ghl = getGHLClient();
+  private ghl: ReturnType<typeof getGHLClient> | null = null;
   private baseUrl = 'https://services.leadconnectorhq.com';
+
+  private getClient() {
+    if (!this.ghl) {
+      this.ghl = getGHLClient();
+    }
+    return this.ghl;
+  }
 
   /**
    * Create a new Voice AI agent
