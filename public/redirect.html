@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>RingCentral OAuth Redirect</title>
+  <script>
+    // This page handles the OAuth redirect for RingCentral widget
+    if (window.opener && window.opener.parent) {
+      const search = window.location.search || window.location.hash;
+      window.opener.parent.postMessage({
+        type: 'rc-oauth-callback',
+        callbackUri: window.location.href
+      }, '*');
+      window.close();
+    }
+  </script>
+</head>
+<body>
+  <p>Redirecting...</p>
+</body>
+</html>

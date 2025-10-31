@@ -39,6 +39,20 @@ export default function RootLayout({
           }}
         />
         <Script
+          id="ringcentral-config"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.RingCentralEmbeddableConfig = {
+                clientId: '6ShnSu51DKYchbvsHMzEzv',
+                appServer: 'https://platform.ringcentral.com',
+                redirectUri: typeof window !== 'undefined' ? window.location.origin + '/redirect.html' : '',
+                disableLoginPopup: true
+              };
+            `
+          }}
+        />
+        <Script
           id="ringcentral-embeddable"
           strategy="lazyOnload"
           src="https://apps.ringcentral.com/integration/ringcentral-embeddable/2.x/adapter.js"
