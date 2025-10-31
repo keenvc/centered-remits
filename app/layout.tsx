@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
+import { VersionChecker } from "@/components/VersionChecker";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+
+// Read version from package.json at build time
+const APP_VERSION = process.env.npm_package_version || '0.1.0';
 
 export const metadata: Metadata = {
   title: "AdvancedCare Remits",
@@ -18,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="app-version" content={APP_VERSION} />
         <Script
           id="marker-config"
           strategy="beforeInteractive"
@@ -38,7 +43,10 @@ export default function RootLayout({
           src="https://apps.ringcentral.com/integration/ringcentral-embeddable/2.x/adapter.js"
         />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <VersionChecker />
+        {children}
+      </body>
     </html>
   );
 }
