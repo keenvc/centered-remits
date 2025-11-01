@@ -35,5 +35,5 @@ databases:
     databaseName: remits
     user: remits_user
     region: oregon # Same region as web service
-    plan: starter # or standard for production
+    plan: free # Using free tier for now
     ipAllowList: [] # Empty = allow all (configure as needed)
