@@ -28,6 +28,7 @@ interface Appointment {
   start_time: string;
   end_time: string | null;
   status: string | null;
+  provider_id: string | null;
   provider_name: string | null;
   internal_notes: string | null;
   instructions: string | null;
@@ -40,14 +41,47 @@ interface Appointment {
 export default function ScheduleCalendar({ appointments }: { appointments: Appointment[] }) {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [appointmentsMap, setAppointmentsMap] = useState<{ [key: string]: Appointment }>({});
+  const [selectedProviders, setSelectedProviders] = useState<Set<string>>(new Set(['all']));
+  const [providers, setProviders] = useState<{ id: string; name: string; count: number }[]>([]);
   
-  // Transform appointments to ScheduleX format
-  const scheduleXEvents = appointments.map(apt => {
+  // Extract unique providers from appointments
+  useEffect(() => {
+    const providerMap = new Map<string, { name: string; count: number }>();
+    
+    appointments.forEach(apt => {
+      const providerId = apt.provider_id || 'unassigned';
+      const providerName = apt.provider_name || 'Unassigned';
+      
+      if (providerMap.has(providerId)) {
+        providerMap.get(providerId)!.count++;
+      } else {
+        providerMap.set(providerId, { name: providerName, count: 1 });
+      }
+    });
+    
+    const providerList = Array.from(providerMap.entries())
+      .map(([id, data]) => ({ id, name: data.name, count: data.count }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    
+    setProviders(providerList);
+  }, [appointments]);
+  
+  // Filter appointments based on selected providers
+  const filteredAppointments = appointments.filter(apt => {
+    if (selectedProviders.has('all')) return true;
+    
+    const providerId = apt.provider_id || 'unassigned';
+    return selectedProviders.has(providerId);
+  });
+  
+  // Transform filtered appointments to ScheduleX format
+  const scheduleXEvents = filteredAppointments.map(apt => {
     const patientName = apt.patient 
       ? `${apt.patient.first_name || ''} ${apt.patient.last_name || ''}`.trim() || 'Unknown Patient'
       : 'Unknown Patient';
     
     const appointmentType = apt.appointment_type || 'Appointment';
+    const providerName = apt.provider_name || 'Unassigned';
     
     // Determine color based on status
     let calendarId = 'scheduled'; // Default
@@ -61,7 +95,7 @@ export default function ScheduleCalendar({ appointments }: { appointments: Appoi
     
     return {
       id: apt.id,
-      title: `${patientName} - ${appointmentType}`,
+      title: `${patientName} - ${appointmentType} (${providerName})`,
       start: apt.start_time,
       end: apt.end_time || apt.start_time,
       calendarId: calendarId,
@@ -78,6 +112,45 @@ export default function ScheduleCalendar({ appointments }: { appointments: Appoi
     });
     setAppointmentsMap(map);
   }, [appointments]);
+  
+  // Handle provider selection
+  const toggleProvider = (providerId: string) => {
+    const newSelected = new Set(selectedProviders);
+    
+    if (providerId === 'all') {
+      // If "All" is clicked, clear all other selections
+      setSelectedProviders(new Set(['all']));
+    } else {
+      // Remove "all" if it's selected
+      newSelected.delete('all');
+      
+      // Toggle the specific provider
+      if (newSelected.has(providerId)) {
+        newSelected.delete(providerId);
+      } else {
+        newSelected.add(providerId);
+      }
+      
+      // If no providers selected, default to "all"
+      if (newSelected.size === 0) {
+        newSelected.add('all');
+      }
+      
+      setSelectedProviders(newSelected);
+    }
+  };
+  
+  // Toggle all providers
+  const toggleAllProviders = () => {
+    if (selectedProviders.has('all') || selectedProviders.size === providers.length) {
+      // If all selected, deselect all
+      setSelectedProviders(new Set());
+    } else {
+      // Select all providers
+      const allProviderIds = new Set(providers.map(p => p.id));
+      setSelectedProviders(allProviderIds);
+    }
+  };
   
   // Initialize ScheduleX calendar
   const calendar = useCalendarApp({
@@ -156,6 +229,55 @@ export default function ScheduleCalendar({ appointments }: { appointments: Appoi
   
   return (
     <div className="bg-white rounded-lg shadow-lg p-4">
+      {/* Provider Filter */}
+      <div className="mb-4 border-b border-gray-200 pb-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold text-gray-900">Filter by Provider</h3>
+          <button
+            onClick={toggleAllProviders}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
+            {selectedProviders.has('all') || selectedProviders.size === providers.length 
+              ? 'Deselect All' 
+              : 'Select All'}
+          </button>
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          {/* All Providers Option */}
+          <button
+            onClick={() => toggleProvider('all')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              selectedProviders.has('all')
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            All Providers ({appointments.length})
+          </button>
+          
+          {/* Individual Provider Options */}
+          {providers.map((provider) => (
+            <button
+              key={provider.id}
+              onClick={() => toggleProvider(provider.id)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                selectedProviders.has(provider.id)
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {provider.name} ({provider.count})
+            </button>
+          ))}
+        </div>
+        
+        {/* Show filtered count */}
+        <div className="mt-3 text-sm text-gray-600">
+          Showing {filteredAppointments.length} of {appointments.length} appointments
+        </div>
+      </div>
+      
       {/* Legend */}
       <div className="mb-4 flex gap-4 text-sm flex-wrap">
         <div className="flex items-center gap-2">
