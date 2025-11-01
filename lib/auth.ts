@@ -3,11 +3,21 @@ import { cookies } from 'next/headers';
 const SESSION_COOKIE_NAME = 'ih_session';
 const SESSION_MAX_AGE = 60 * 60 * 24; // 24 hours
 
-// Hardcoded credentials
-const VALID_CREDENTIALS = {
-  email: 'nmurray@gmail.com',
-  password: 'VancouverBC1!'
-};
+// Hardcoded credentials - supports multiple users
+const VALID_CREDENTIALS = [
+  {
+    email: 'nmurray@gmail.com',
+    password: 'VancouverBC1!'
+  },
+  {
+    email: 'doctor@centered.test',
+    password: 'test123'
+  },
+  {
+    email: 'admin@centered.test',
+    password: 'admin123'
+  }
+];
 
 export interface SessionData {
   email: string;
@@ -18,8 +28,10 @@ export interface SessionData {
  * Validate user credentials
  */
 export function validateCredentials(email: string, password: string): boolean {
-  // Use constant-time comparison for password
-  return email === VALID_CREDENTIALS.email && password === VALID_CREDENTIALS.password;
+  // Check against all valid credentials
+  return VALID_CREDENTIALS.some(
+    cred => cred.email === email && cred.password === password
+  );
 }
 
 /**
