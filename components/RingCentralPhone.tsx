@@ -57,46 +57,71 @@ export default function RingCentralPhone() {
     
     // Function to create an overlay that covers the demo banner
     const createBannerOverlay = () => {
+      console.log('🎨 Attempting to create banner overlay...');
+      
       const iframe = document.querySelector('#rc-widget-adapter-frame') as HTMLIFrameElement;
-      if (!iframe) return;
+      if (!iframe) {
+        console.log('⚠️  RingCentral iframe not found yet, will retry...');
+        return false;
+      }
       
       // Check if overlay already exists
       let overlay = document.querySelector('.rc-banner-overlay') as HTMLDivElement;
-      if (overlay) return;
+      if (overlay) {
+        console.log('✅ Overlay already exists');
+        return true;
+      }
       
       // Create overlay element
       overlay = document.createElement('div');
       overlay.className = 'rc-banner-overlay';
       overlay.style.cssText = `
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 42px;
-        background: #0073ae;
-        z-index: 999999;
-        pointer-events: none;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100vw !important;
+        height: 42px !important;
+        background: #0073ae !important;
+        z-index: 2147483647 !important;
+        pointer-events: none !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        display: block !important;
       `;
       
-      // Insert overlay as sibling to iframe
+      // Append to body to ensure it's on top of everything
+      document.body.appendChild(overlay);
+      console.log('✅ Demo banner overlay created and appended to body!');
+      
+      // Also try to position relative to iframe
       const parent = iframe.parentElement;
       if (parent) {
-        // Make parent position relative if not already
         const parentPosition = window.getComputedStyle(parent).position;
         if (parentPosition === 'static') {
           parent.style.position = 'relative';
         }
-        parent.insertBefore(overlay, iframe);
-        console.log('✅ Demo banner overlay created');
       }
+      
+      return true;
     };
     
     // Initialize after a short delay to ensure widget is loaded
     const timer = setTimeout(initWidget, 2000);
     
-    // Create overlay after widget loads
-    const overlayTimer = setTimeout(createBannerOverlay, 5000);
+    // Create overlay with multiple retry attempts to ensure it works
+    const overlayTimers: NodeJS.Timeout[] = [];
+    
+    // Try creating overlay at multiple intervals
+    [3000, 5000, 7000, 10000, 15000].forEach(delay => {
+      const t = setTimeout(() => {
+        const created = createBannerOverlay();
+        if (created) {
+          // Clear remaining timers if overlay was created
+          overlayTimers.forEach(timer => clearTimeout(timer));
+        }
+      }, delay);
+      overlayTimers.push(t);
+    });
     
     // Additional attempt to hide demo banner using CSS (for any elements outside iframe)
     const hideBannerStyle = document.createElement('style');
@@ -113,7 +138,7 @@ export default function RingCentralPhone() {
     
     return () => {
       clearTimeout(timer);
-      clearTimeout(overlayTimer);
+      overlayTimers.forEach(t => clearTimeout(t));
       if (hideBannerStyle && hideBannerStyle.parentNode) {
         document.head.removeChild(hideBannerStyle);
       }
