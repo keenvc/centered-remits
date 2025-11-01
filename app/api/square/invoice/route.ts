@@ -3,13 +3,15 @@ import { Client, Environment } from 'square';
 import nodemailer from 'nodemailer';
 import twilio from 'twilio';
 
-// Initialize Square client
-const squareClient = new Client({
-  accessToken: process.env.SQUARE_ACCESS_TOKEN,
-  environment: process.env.SQUARE_ENVIRONMENT === 'production' 
-    ? Environment.Production 
-    : Environment.Sandbox,
-});
+// Initialize Square client (lazy initialization to avoid build-time errors)
+function getSquareClient() {
+  return new Client({
+    accessToken: process.env.SQUARE_ACCESS_TOKEN,
+    environment: process.env.SQUARE_ENVIRONMENT === 'production' 
+      ? Environment.Production 
+      : Environment.Sandbox,
+  });
+}
 
 // Initialize MXRoute email transporter
 const transporter = nodemailer.createTransport({
@@ -130,6 +132,7 @@ export async function POST(req: NextRequest) {
     };
 
     // Create the invoice
+    const squareClient = getSquareClient();
     const invoiceResponse = await squareClient.invoicesApi.createInvoice(invoiceData);
 
     if (!invoiceResponse.result.invoice) {

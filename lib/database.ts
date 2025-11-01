@@ -23,27 +23,67 @@ export async function getPatients() {
 }
 
 export async function getPatientById(id: string) {
-  return await prisma.patients.findUnique({
+  const patient = await prisma.patients.findUnique({
     where: { id },
     include: {
       invoices: {
-        include: { line_items: true }
+        include: { line_items: true },
+        orderBy: { date_of_service: 'desc' }
       },
       patient_plans: true,
-      payments: true,
+      payments: {
+        orderBy: { payment_date: 'desc' }
+      },
       square_transactions: {
         orderBy: { transaction_date: 'desc' }
       },
       clinical_notes: {
         orderBy: { note_date: 'desc' },
-        take: 5
+        take: 10
       },
       patient_surveys: {
         orderBy: { completed_date: 'desc' },
-        take: 5
+        take: 10
       }
     }
   });
+
+  if (!patient) {
+    return null;
+  }
+
+  // Fetch appointments from osmind_appointments table
+  const appointments = await prisma.osmind_appointments.findMany({
+    where: {
+      patient: {
+        OR: [
+          { id: patient.id },
+          { email: patient.email || '' },
+          { first_name: patient.first_name || '', last_name: patient.last_name || '' }
+        ]
+      }
+    },
+    orderBy: { appointment_date: 'desc' },
+    take: 20
+  });
+
+  // Fetch claims from remittance_claims table using patient name
+  const claims = await prisma.remittance_claims.findMany({
+    where: {
+      OR: [
+        { patient_id: patient.id },
+        { patient_name: { contains: `${patient.last_name}`, mode: 'insensitive' } }
+      ]
+    },
+    orderBy: { claim_date_from: 'desc' },
+    take: 20
+  });
+
+  return {
+    ...patient,
+    appointments,
+    claims
+  };
 }
 
 export async function getInvoices() {
