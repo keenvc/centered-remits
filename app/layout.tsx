@@ -44,7 +44,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               window.RingCentralEmbeddableConfig = {
-                clientId: '6ShnSu51DKYchbvsHMzEzv',
+                clientId: '${process.env.NEXT_PUBLIC_RINGCENTRAL_CLIENT_ID || '6ShnSu51DKYchbvsHMzEzv'}',
                 appServer: 'https://platform.ringcentral.com',
                 redirectUri: typeof window !== 'undefined' ? window.location.origin + '/redirect.html' : '',
                 disableLoginPopup: true,
@@ -63,7 +63,7 @@ export default function RootLayout({
                 enableWebRTCPlanB: false,
                 disableCallBadge: true,
                 brand: {
-                  id: '6ShnSu51DKYchbvsHMzEzv',
+                  id: '${process.env.NEXT_PUBLIC_RINGCENTRAL_CLIENT_ID || '6ShnSu51DKYchbvsHMzEzv'}',
                   name: 'AdvancedCare Centered',
                   code: 'advancedcare'
                 }
