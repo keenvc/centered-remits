@@ -6,6 +6,8 @@
 import { NextResponse } from 'next/server';
 import { VoiceAIService } from '@/lib/ghl/voice-ai-service';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
