@@ -57,7 +57,16 @@ export default function RootLayout({
                 disableMeetings: true,
                 disableConferenceCall: true,
                 enableCallHistory: true,
-                disableActiveCallControl: false
+                disableActiveCallControl: false,
+                prefix: 'rc-widget',
+                showMyLocation: false,
+                enableWebRTCPlanB: false,
+                disableCallBadge: true,
+                brand: {
+                  id: '6ShnSu51DKYchbvsHMzEzv',
+                  name: 'AdvancedCare Centered',
+                  code: 'advancedcare'
+                }
               };
             `
           }}

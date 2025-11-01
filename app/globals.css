@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide RingCentral demo banner - wrapper approach */
+#rc-widget-adapter-frame {
+  position: relative !important;
+}
+
+/* Hide any banner containers that might appear outside iframe */
+[class*="rc-banner"],
+[class*="rc-demo"],
+[id*="rc-banner"],
+[class*="Banner"][class*="demo"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* RingCentral widget banner overlay */
+.rc-banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 42px;
+  background: #0073ae;
+  z-index: 999999;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
