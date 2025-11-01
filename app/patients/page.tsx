@@ -257,9 +257,13 @@ export default function PatientsPage() {
                 const hasCopay = verification?.copay_amount;
                 
                 return (
-                  <tr key={patient.id} className="hover:bg-gray-50 transition">
+                  <tr 
+                    key={patient.id} 
+                    onClick={() => window.location.href = `/patients/${patient.id}`}
+                    className="hover:bg-gray-50 transition cursor-pointer"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Link href={`/patients/${patient.id}`} className="flex items-center">
+                      <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
                           <User className="w-5 h-5 text-blue-600" />
                         </div>
@@ -271,22 +275,18 @@ export default function PatientsPage() {
                             MRN: {patient.health_record_id || 'N/A'}
                           </div>
                         </div>
-                      </Link>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Link href={`/patients/${patient.id}`}>
-                        <div className="text-sm text-gray-900">{patient.email}</div>
-                        <div className="text-sm text-gray-500">{patient.cell_phone}</div>
-                      </Link>
+                      <div className="text-sm text-gray-900">{patient.email}</div>
+                      <div className="text-sm text-gray-500">{patient.cell_phone}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Link href={`/patients/${patient.id}`}>
-                        <div className={`text-sm font-medium ${
-                          patient.balance_cents > 0 ? 'text-red-600' : 'text-green-600'
-                        }`}>
-                          {formatCurrency(patient.balance_cents || 0)}
-                        </div>
-                      </Link>
+                      <div className={`text-sm font-medium ${
+                        patient.balance_cents > 0 ? 'text-red-600' : 'text-green-600'
+                      }`}>
+                        {formatCurrency(patient.balance_cents || 0)}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {hasCopay ? (
@@ -296,7 +296,7 @@ export default function PatientsPage() {
                           </span>
                           <button
                             onClick={(e) => handleSquareClick(e, patient)}
-                            className="hover:opacity-80 transition"
+                            className="hover:opacity-80 transition z-10 relative"
                             title="Send Square Invoice"
                           >
                             <Image
@@ -316,7 +316,7 @@ export default function PatientsPage() {
                       {verification ? (
                         <button
                           onClick={(e) => handleVOBClick(e, patient)}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition"
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition z-10 relative"
                         >
                           <FileCheck className="w-4 h-4" />
                           View VOB
@@ -326,31 +326,27 @@ export default function PatientsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Link href={`/patients/${patient.id}`}>
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          patient.billing_status === 'paid' ? 'bg-green-100 text-green-800' :
-                          patient.billing_status === 'overdue' ? 'bg-red-100 text-red-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {patient.billing_status || 'current'}
-                        </span>
-                      </Link>
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        patient.billing_status === 'paid' ? 'bg-green-100 text-green-800' :
+                        patient.billing_status === 'overdue' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {patient.billing_status || 'current'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Link href={`/patients/${patient.id}`}>
-                        <span className={`inline-flex items-center gap-1 text-xs ${
-                          patient.sync_status === 'synced' ? 'text-green-600' :
-                          patient.sync_status === 'pending' ? 'text-yellow-600' :
-                          'text-gray-400'
-                        }`}>
-                          <div className={`w-2 h-2 rounded-full ${
-                            patient.sync_status === 'synced' ? 'bg-green-600' :
-                            patient.sync_status === 'pending' ? 'bg-yellow-600' :
-                            'bg-gray-400'
-                          }`}></div>
-                          {patient.sync_status || 'not synced'}
-                        </span>
-                      </Link>
+                      <span className={`inline-flex items-center gap-1 text-xs ${
+                        patient.sync_status === 'synced' ? 'text-green-600' :
+                        patient.sync_status === 'pending' ? 'text-yellow-600' :
+                        'text-gray-400'
+                      }`}>
+                        <div className={`w-2 h-2 rounded-full ${
+                          patient.sync_status === 'synced' ? 'bg-green-600' :
+                          patient.sync_status === 'pending' ? 'bg-yellow-600' :
+                          'bg-gray-400'
+                        }`}></div>
+                        {patient.sync_status || 'not synced'}
+                      </span>
                     </td>
                   </tr>
                 );

@@ -36,6 +36,19 @@ export default function RingCentralPhone() {
                   }, '*');
                   
                   console.log('✅ RingCentral authenticated successfully!');
+                  
+                  // Hide demo banner after authentication
+                  setTimeout(() => {
+                    try {
+                      // Try to hide the banner by sending a custom style message
+                      iframe.contentWindow?.postMessage({
+                        type: 'rc-adapter-set-environment',
+                        environment: 'production'
+                      }, '*');
+                    } catch (err) {
+                      console.log('Could not hide demo banner (cross-origin restriction)');
+                    }
+                  }, 1000);
                 }
               } else {
                 console.error('Failed to get RingCentral access token:', authData);
@@ -53,8 +66,23 @@ export default function RingCentralPhone() {
     // Initialize after a short delay to ensure widget is loaded
     const timer = setTimeout(initWidget, 2000);
     
+    // Additional attempt to hide demo banner using CSS (for any elements outside iframe)
+    const hideBannerStyle = document.createElement('style');
+    hideBannerStyle.textContent = `
+      [class*="rc-banner"],
+      [class*="rc-demo"],
+      [id*="rc-banner"],
+      div[class*="Banner"] {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(hideBannerStyle);
+    
     return () => {
       clearTimeout(timer);
+      if (hideBannerStyle && hideBannerStyle.parentNode) {
+        document.head.removeChild(hideBannerStyle);
+      }
     };
   }, []);
   

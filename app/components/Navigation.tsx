@@ -160,6 +160,16 @@ export default function Navigation({ userEmail = 'nmurray@gmail.com' }: Navigati
               Patients
             </Link>
             <Link
+              href="/schedule"
+              className={`border-b-2 px-3 py-3 text-sm font-medium transition ${
+                pathname.startsWith('/schedule')
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Appointments
+            </Link>
+            <Link
               href="/invoices"
               className={`border-b-2 px-3 py-3 text-sm font-medium transition ${
                 pathname.startsWith('/invoices')

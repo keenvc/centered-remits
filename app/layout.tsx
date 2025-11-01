@@ -47,7 +47,17 @@ export default function RootLayout({
                 clientId: '6ShnSu51DKYchbvsHMzEzv',
                 appServer: 'https://platform.ringcentral.com',
                 redirectUri: typeof window !== 'undefined' ? window.location.origin + '/redirect.html' : '',
-                disableLoginPopup: true
+                disableLoginPopup: true,
+                appName: 'AdvancedCare Centered',
+                appVersion: '1.0.0',
+                enableDiscovery: false,
+                disableGlip: true,
+                disableConferenceInvite: true,
+                disableMessages: true,
+                disableMeetings: true,
+                disableConferenceCall: true,
+                enableCallHistory: true,
+                disableActiveCallControl: false
               };
             `
           }}
