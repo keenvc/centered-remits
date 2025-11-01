@@ -41,9 +41,9 @@ export default function LobeChatPage() {
         />
       </main>
 
-      {/* Info Banner (Optional) */}
+      {/* Info Banner - Positioned above RingCentral widget */}
       {iframeLoaded && (
-        <div className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+        <div className="fixed bottom-24 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span>AI Chat: Ultra-fast Groq LLM</span>
